@@ -39,7 +39,7 @@
 $scriptFolder = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 # Input CSV - script ke same folder mein
-$csvFile = Join-Path $scriptFolder "resources.csv"
+$csvFile = Join-Path $scriptFolder "C:\Vikram\Pipeline\Pipe line prctice-01-sep\RG-Creation\create-tfvars.ps1"
 
 # Output terraform.tfvars - script ke same folder mein
 $tfvarsFile = Join-Path $scriptFolder "terraform.tfvars"
