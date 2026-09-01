@@ -31,23 +31,24 @@
 
 ## script local and pipeline
 
-# ==========================================
-# CSV to Terraform TFVARS Generator
-# ==========================================
+# # ============================================
+# Terraform TFVARS Generator
+# Works in Local PowerShell + Azure DevOps
+# ============================================
 
-# Script jis folder mein hai
-$scriptFolder = Split-Path -Parent $MyInvocation.MyCommand.Definition
+# Script folder
+$scriptFolder = $PSScriptRoot
 
-# Input CSV - script ke same folder mein
-$csvFile = Join-Path $scriptFolder "C:\Vikram\Pipeline\Pipe line prctice-01-sep\RG-Creation\create-tfvars.ps1"
+# CSV file name
+$csvFile = Join-Path $scriptFolder "azure_10_resources_portal.csv"
 
-# Output terraform.tfvars - script ke same folder mein
+# Output terraform.tfvars
 $tfvarsFile = Join-Path $scriptFolder "terraform.tfvars"
 
 Write-Host ""
-Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "   Terraform TFVARS Generator" -ForegroundColor Cyan
-Write-Host "==========================================" -ForegroundColor Cyan
+Write-Host "=========================================="
+Write-Host "      Terraform TFVARS Generator"
+Write-Host "=========================================="
 Write-Host ""
 
 Write-Host "Script Folder : $scriptFolder"
@@ -55,24 +56,37 @@ Write-Host "CSV File      : $csvFile"
 Write-Host "Output File   : $tfvarsFile"
 Write-Host ""
 
-# Check CSV exists
+# Check CSV file
 if (-not (Test-Path $csvFile)) {
-    Write-Host "ERROR: resources.csv not found!" -ForegroundColor Red
-    Write-Host "Please keep resources.csv in the same folder as this script."
+
+    Write-Host "ERROR: azure_10_resources_portal.csv not found!" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Files available in script folder:"
+    Get-ChildItem $scriptFolder | Select-Object Name
+
     exit 1
 }
 
 # Read CSV
 $resources = Import-Csv $csvFile
 
-# Start Terraform map
+Write-Host "Total resources found: $($resources.Count)" -ForegroundColor Cyan
+Write-Host ""
+
+# Create Terraform content
 $lines = @()
-$lines += 'resource_groups = {'
+
+$lines += "rgs = {"
 
 foreach ($resource in $resources) {
 
     $rgName = $resource.'Resource Group Name'.Trim()
     $location = $resource.Location.Trim()
+
+    Write-Host "Adding Resource Group:"
+    Write-Host "  Name     : $rgName"
+    Write-Host "  Location : $location"
+    Write-Host ""
 
     $lines += "  `"$rgName`" = {"
     $lines += "    name     = `"$rgName`""
@@ -80,20 +94,19 @@ foreach ($resource in $resources) {
     $lines += "  }"
 }
 
-$lines += '}'
+$lines += "}"
 
 # Create terraform.tfvars
 $lines | Set-Content -Path $tfvarsFile -Encoding UTF8
 
 Write-Host ""
-Write-Host "==========================================" -ForegroundColor Green
-Write-Host " terraform.tfvars CREATED SUCCESSFULLY" -ForegroundColor Green
-Write-Host "==========================================" -ForegroundColor Green
+Write-Host "=========================================="
+Write-Host " terraform.tfvars created successfully!"
+Write-Host "=========================================="
 Write-Host ""
 
-Write-Host "Saved at:"
-Write-Host $tfvarsFile -ForegroundColor Yellow
-
-Write-Host ""
-Write-Host "File exists:" (Test-Path $tfvarsFile)
+# Display generated file
+Write-Host "===== terraform.tfvars ====="
+Get-Content $tfvarsFile
+Write-Host "============================"
 Write-Host ""
