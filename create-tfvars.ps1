@@ -4,7 +4,7 @@ $tfvarsFile = ".\terraform.tfvars"
 $resources = Import-Csv $csvFile
 
 $lines = @()
-$lines += "resource_groups = {"
+$lines += "rgs = {"
 
 foreach ($resource in $resources) {
     $rgName = $resource.'Resource Group Name'.Trim()
